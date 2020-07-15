@@ -1,7 +1,7 @@
 {
   "name": "devportfolio-template",
   "version": "1.2.2",
-  "description": "",
+  "description": "This repo is inspired from \r https://github.com/RyanFitzgerald/devportfolio",
   "main": "js/scripts.js",
   "scripts": {
     "watch": "gulp watch"
@@ -27,5 +27,14 @@
     "gulp-sass": "^4.0.2",
     "gulp-uglify": "^3.0.2",
     "gulp-wait": "0.0.2"
-  }
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KushleshKumar/KushleshKumar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KushleshKumar/KushleshKumar/issues"
+  },
+  "homepage": "https://github.com/KushleshKumar/KushleshKumar#readme"
 }
