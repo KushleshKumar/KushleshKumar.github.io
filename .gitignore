@@ -2,3 +2,12 @@ node_modules/
 
 # Local Netlify folder
 .netlify
+
+# Cloudflare Wrangler local cache/state
+.wrangler/
+
+# Claude Code local settings & dev launch config
+.claude/
+
+# macOS folder metadata
+.DS_Store

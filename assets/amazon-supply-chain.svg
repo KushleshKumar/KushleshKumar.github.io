@@ -1,0 +1,80 @@
+<svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amazon global supply chain decisioning network">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9eefb"/>
+      <stop offset="1" stop-color="#f1ecf8"/>
+    </linearGradient>
+    <linearGradient id="hub" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a371f7"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="route" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="0.55" stop-color="#a371f7"/>
+      <stop offset="1" stop-color="#ec6cb9"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#a371f7" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#a371f7" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#3b3550" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="420" fill="url(#bg)"/>
+
+  <!-- network reach rings -->
+  <g fill="none" stroke="#7c5cd8" stroke-opacity="0.12">
+    <circle cx="300" cy="212" r="108"/>
+    <circle cx="300" cy="212" r="168"/>
+    <circle cx="300" cy="212" r="228"/>
+  </g>
+
+  <!-- routes -->
+  <g fill="none" stroke="url(#route)" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 9" stroke-opacity="0.55">
+    <path id="r1" d="M300 212 Q 188 140 108 104"/>
+    <path id="r2" d="M300 212 Q 410 150 492 118"/>
+    <path id="r3" d="M300 212 Q 176 272 92 300"/>
+    <path id="r4" d="M300 212 Q 424 272 506 300"/>
+    <path id="r5" d="M300 212 Q 300 296 300 360"/>
+  </g>
+
+  <!-- packages in transit -->
+  <g>
+    <circle r="3.5" fill="#3b82f6"><animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto"><mpath href="#r2"/></animateMotion></circle>
+    <circle r="3.5" fill="#ec6cb9"><animateMotion dur="6.5s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#r3"/></animateMotion></circle>
+    <circle r="3.5" fill="#a371f7"><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#r4"/></animateMotion></circle>
+  </g>
+
+  <!-- satellite fulfillment nodes -->
+  <g filter="url(#soft)">
+    <g transform="translate(108 104)"><circle r="15" fill="#fff" stroke="url(#hub)" stroke-width="2.5"/><circle r="4.5" fill="#3b82f6"/></g>
+    <g transform="translate(492 118)"><circle r="17" fill="#fff" stroke="url(#hub)" stroke-width="2.5"/><circle r="5" fill="#a371f7"/></g>
+    <g transform="translate(92 300)"><circle r="14" fill="#fff" stroke="url(#hub)" stroke-width="2.5"/><circle r="4" fill="#ec6cb9"/></g>
+    <g transform="translate(506 300)"><circle r="16" fill="#fff" stroke="url(#hub)" stroke-width="2.5"/><circle r="4.5" fill="#3b82f6"/></g>
+    <g transform="translate(300 360)"><circle r="13" fill="#fff" stroke="url(#hub)" stroke-width="2.5"/><circle r="4" fill="#a371f7"/></g>
+  </g>
+
+  <!-- package glyphs near two nodes -->
+  <g stroke="#7c5cd8" stroke-opacity="0.5" fill="none" stroke-width="1.6" stroke-linejoin="round">
+    <g transform="translate(486 150)"><rect x="0" y="0" width="26" height="22" rx="3"/><path d="M0 8 H26 M13 0 V8"/></g>
+    <g transform="translate(96 246)"><rect x="0" y="0" width="24" height="20" rx="3"/><path d="M0 7 H24 M12 0 V7"/></g>
+  </g>
+
+  <!-- central decisioning hub -->
+  <circle cx="300" cy="212" r="74" fill="url(#glow)"/>
+  <circle cx="300" cy="212" r="50" fill="none" stroke="#a371f7" stroke-opacity="0.25" stroke-width="1.5">
+    <animate attributeName="r" values="44;56;44" dur="3.8s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-opacity" values="0.30;0;0.30" dur="3.8s" repeatCount="indefinite"/>
+  </circle>
+  <g filter="url(#soft)">
+    <circle cx="300" cy="212" r="37" fill="url(#hub)"/>
+  </g>
+  <circle cx="288" cy="200" r="13" fill="#fff" fill-opacity="0.16"/>
+  <!-- inventory cube glyph -->
+  <g transform="translate(300 212)" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" fill="none">
+    <path d="M0 -15 L13 -7.5 L13 7.5 L0 15 L-13 7.5 L-13 -7.5 Z"/>
+    <path d="M0 -15 L0 0 M0 0 L13 -7.5 M0 0 L-13 -7.5"/>
+  </g>
+</svg>
