@@ -14,6 +14,13 @@
 
   if (!ENDPOINT || ENDPOINT === "REPLACE_WITH_WORKER_URL") return; // not configured yet
 
+  // The page's bundle loader re-executes scripts when it swaps the document at
+  // runtime, which would run this tracker twice and double-count every event.
+  // The first run's delegated listeners survive the swap, so we just bail out of
+  // any later run in the same window.
+  if (window.__analyticsInit) return;
+  window.__analyticsInit = true;
+
   // ---- visitor + session identity (first-party storage only) ----
   function uuid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
