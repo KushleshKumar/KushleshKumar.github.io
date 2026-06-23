@@ -18,3 +18,17 @@ database_id = "43ba52f7-4d36-4528-9801-fa2767167e76"
 #
 # /collect is intentionally public (that is how browser beacons work);
 # only /api/stats requires the token.
+
+# Static assets: the dashboard UI is served by this Worker at /dashboard,
+# gated by Cloudflare Access (see README → "Host the dashboard with Google login").
+[assets]
+directory = "./public"
+
+# Cloudflare Access (Zero Trust SSO). Fill these in AFTER creating the Access
+# application that protects this Worker, so /api/stats accepts your Google login
+# instead of the token. Leave empty until then — DASH_TOKEN keeps working.
+#   ACCESS_TEAM_DOMAIN : your team domain, e.g. "kushlesh.cloudflareaccess.com"
+#   ACCESS_AUD         : the Application Audience (AUD) tag of that Access app
+[vars]
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""

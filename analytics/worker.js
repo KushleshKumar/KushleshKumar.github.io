@@ -126,8 +126,11 @@ async function collect(request, env) {
 // GET /api/stats
 // ---------------------------------------------------------------------------
 async function stats(request, env, url) {
+  // Authorised by EITHER a valid Cloudflare Access SSO login (Google — nothing to
+  // remember) OR the DASH_TOKEN (local dashboard / scripts / CSV download links).
   const token = url.searchParams.get("token") || bearer(request);
-  if (!env.DASH_TOKEN || token !== env.DASH_TOKEN) {
+  const tokenOk = !!env.DASH_TOKEN && token === env.DASH_TOKEN;
+  if (!tokenOk && !(await accessOk(request, env))) {
     return cors(new Response("Unauthorized", { status: 401 }));
   }
 
@@ -228,6 +231,67 @@ function clampInt(v, def, min, max) {
 function bearer(request) {
   const m = (request.headers.get("authorization") || "").match(/^Bearer\s+(.+)$/i);
   return m ? m[1] : "";
+}
+
+// ---- Cloudflare Access (Zero Trust SSO) -----------------------------------
+// With ACCESS_TEAM_DOMAIN + ACCESS_AUD set (see wrangler.toml), the dashboard is
+// reached through a Google login enforced by Cloudflare Access, which signs a
+// short-lived JWT into every request. We verify that JWT here so no static token
+// is needed. Until those vars are set this returns false and DASH_TOKEN is used.
+let _jwks = { team: "", keys: null, exp: 0 };
+
+async function accessOk(request, env) {
+  const team = env.ACCESS_TEAM_DOMAIN, aud = env.ACCESS_AUD;
+  if (!team || !aud) return false;
+  const jwt = request.headers.get("Cf-Access-Jwt-Assertion") || cookie(request, "CF_Authorization");
+  if (!jwt) return false;
+  try { return !!(await verifyAccessJwt(jwt, team, aud)); }
+  catch (_) { return false; }
+}
+
+async function accessKeys(team) {
+  const now = Date.now();
+  if (_jwks.team === team && _jwks.keys && _jwks.exp > now) return _jwks.keys;
+  const res = await fetch(`https://${team}/cdn-cgi/access/certs`);
+  const data = await res.json();
+  _jwks = { team, keys: data.keys || [], exp: now + 3600000 }; // cache 1h
+  return _jwks.keys;
+}
+
+async function verifyAccessJwt(token, team, aud) {
+  const [h, p, sig] = token.split(".");
+  if (!h || !p || !sig) return null;
+  const header = JSON.parse(b64urlStr(h));
+  if (header.alg !== "RS256") return null;
+  const jwk = (await accessKeys(team)).find((k) => k.kid === header.kid);
+  if (!jwk) return null;
+  const key = await crypto.subtle.importKey(
+    "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]
+  );
+  const ok = await crypto.subtle.verify(
+    "RSASSA-PKCS1-v1_5", key, b64urlBytes(sig), new TextEncoder().encode(`${h}.${p}`)
+  );
+  if (!ok) return null;
+  const claims = JSON.parse(b64urlStr(p));
+  const now = Math.floor(Date.now() / 1000);
+  if (claims.exp && claims.exp < now) return null;
+  if (claims.iss && claims.iss !== `https://${team}`) return null;
+  const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+  if (!auds.includes(aud)) return null;
+  return claims;
+}
+
+function b64urlBytes(s) {
+  s = s.replace(/-/g, "+").replace(/_/g, "/");
+  while (s.length % 4) s += "=";
+  const bin = atob(s), out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function b64urlStr(s) { return new TextDecoder().decode(b64urlBytes(s)); }
+function cookie(request, name) {
+  const m = (request.headers.get("cookie") || "").match(new RegExp("(?:^|; )" + name + "=([^;]+)"));
+  return m ? decodeURIComponent(m[1]) : "";
 }
 function parseUA(ua) {
   const u = ua.toLowerCase();

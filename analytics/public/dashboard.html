@@ -61,6 +61,7 @@
   <input id="token" type="password" placeholder="dashboard token" size="20">
   <button class="primary" id="connect">Connect</button>
   <span id="conn" style="color:var(--muted)"></span>
+  <a id="logout" href="/cdn-cgi/access/logout" style="display:none;margin-left:auto;color:var(--muted);font-size:12px">Log out ⎋</a>
 </header>
 
 <div class="wrap">
@@ -103,7 +104,9 @@ const COLS = [
   { k: "ts", label: "Time", fmt: (v) => new Date(v).toLocaleString() },
   { k: "type", label: "Type", fmt: (v) => `<span class="pill">${esc(v||"")}</span>` },
   { k: "country", label: "Country" },
+  { k: "region", label: "Region" },
   { k: "city", label: "City" },
+  { k: "postal", label: "ZIP" },
   { k: "isp", label: "ISP / org" },
   { k: "ip", label: "IP", cls: "mono" },
   { k: "path", label: "Path", cls: "mono" },
@@ -117,8 +120,13 @@ const COLS = [
 ];
 
 function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+const HOSTED = location.protocol !== "file:";   // served by the Worker, behind Cloudflare Access
 function save() { localStorage.setItem("__an_api", $("api").value.trim()); localStorage.setItem("__an_tok", $("token").value); }
-function api() { return $("api").value.trim().replace(/\/$/, ""); }
+function api() {
+  const v = $("api").value.trim().replace(/\/$/, "");
+  if (v) return v;
+  return HOSTED ? location.origin : "";   // same-origin; the Access SSO cookie authorises us
+}
 
 function dayMs(v, end) {
   if (!v) return "";
@@ -127,7 +135,7 @@ function dayMs(v, end) {
 }
 function query(extra) {
   const p = new URLSearchParams();
-  p.set("token", $("token").value);
+  if ($("token").value) p.set("token", $("token").value);   // omitted when using Access SSO
   if ($("from").value) p.set("from", dayMs($("from").value, false));
   if ($("to").value) p.set("to", dayMs($("to").value, true));
   if ($("type").value) p.set("type", $("type").value);
@@ -141,7 +149,7 @@ function query(extra) {
 }
 
 async function load() {
-  if (!api() || !$("token").value) { $("conn").textContent = "enter URL + token"; return; }
+  if (!api() || (!HOSTED && !$("token").value)) { $("conn").textContent = "enter URL + token"; return; }
   save();
   $("conn").textContent = "loading…"; $("conn").className = "";
   try {
@@ -153,6 +161,7 @@ async function load() {
     renderCards(data); renderTops(data.summary || {}); renderTable();
     $("conn").innerHTML = `<span style="color:var(--good)">● ${data.total} events · ${data.uniqueVisitors} visitors</span>`;
   } catch (e) {
+    if (HOSTED && /unauthor/i.test(e.message)) showControls();
     $("conn").innerHTML = `<span class="err">● ${esc(e.message)}</span>`;
   }
 }
@@ -197,17 +206,27 @@ function renderTable() {
 $("connect").onclick = load;
 $("apply").onclick = load;
 $("csv").onclick = () => {
-  if (!api() || !$("token").value) return;
+  if (!api() || (!HOSTED && !$("token").value)) return;
   const a = document.createElement("a");
   a.href = api() + "/api/stats?" + query({ format: "csv" });
   a.download = "visits.csv";
   document.body.appendChild(a); a.click(); a.remove();
 };
 
+function showControls() { ["api", "token", "connect"].forEach((id) => $(id).style.display = ""); }
+
 // restore saved connection
 $("api").value = localStorage.getItem("__an_api") || "";
 $("token").value = localStorage.getItem("__an_tok") || "";
-if ($("api").value && $("token").value) load();
+if (HOSTED) {
+  // Hosted behind Cloudflare Access: SSO handles auth — hide the manual URL/token
+  // controls, expose Log out, and connect straight to our own origin.
+  ["api", "token", "connect"].forEach((id) => $(id).style.display = "none");
+  $("logout").style.display = "";
+  load();
+} else if ($("api").value && $("token").value) {
+  load();
+}
 </script>
 </body>
 </html>
