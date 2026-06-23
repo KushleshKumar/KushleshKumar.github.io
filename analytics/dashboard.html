@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Visitor analytics</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --panel2: #1e222b; --line: #2a2f3a;
+    --txt: #e6e8ec; --muted: #9aa3b2; --accent: #a371f7; --accent2: #ec6cb9;
+    --good: #3fb950;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--txt);
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 16px 20px; border-bottom: 1px solid var(--line);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    background: linear-gradient(90deg, rgba(163,113,247,.08), rgba(236,108,185,.05)); }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; font-weight: 600; }
+  input, select, button { font: inherit; color: var(--txt); background: var(--panel2);
+    border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; }
+  input::placeholder { color: var(--muted); }
+  button { cursor: pointer; background: var(--panel2); }
+  button.primary { background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #fff; border: none; font-weight: 600; }
+  button:hover { border-color: var(--accent); }
+  .wrap { padding: 16px 20px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .filters label { color: var(--muted); font-size: 12px; display: inline-flex; flex-direction: column; gap: 3px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .card .n { font-size: 26px; font-weight: 700; }
+  .card .l { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .tops { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px; margin-bottom: 16px; }
+  .top { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .top h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .top .row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-top: 1px solid var(--line); }
+  .top .row:first-of-type { border-top: none; }
+  .top .row span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top .row b { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .tablewrap { overflow: auto; border: 1px solid var(--line); border-radius: 10px; max-height: 62vh; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 7px 10px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  th { position: sticky; top: 0; background: var(--panel2); cursor: pointer; user-select: none; font-weight: 600; }
+  th:hover { color: var(--accent); }
+  tbody tr:hover { background: var(--panel); }
+  td.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--muted); }
+  .pill { padding: 1px 7px; border-radius: 20px; font-size: 11px; background: var(--panel2); border: 1px solid var(--line); }
+  .msg { color: var(--muted); padding: 24px; text-align: center; }
+  .err { color: #f85149; }
+  a { color: var(--accent2); }
+</style>
+</head>
+<body>
+<header>
+  <h1>👁 Visitor analytics</h1>
+  <input id="api" placeholder="https://site-analytics.you.workers.dev" size="34">
+  <input id="token" type="password" placeholder="dashboard token" size="20">
+  <button class="primary" id="connect">Connect</button>
+  <span id="conn" style="color:var(--muted)"></span>
+</header>
+
+<div class="wrap">
+  <div class="filters">
+    <label>From<input id="from" type="date"></label>
+    <label>To<input id="to" type="date"></label>
+    <label>Type
+      <select id="type">
+        <option value="">all</option>
+        <option>pageview</option><option>click</option><option>outbound</option>
+        <option>download</option><option>scroll</option><option>ping</option>
+      </select>
+    </label>
+    <label>Country<input id="country" placeholder="US" size="4"></label>
+    <label>Path<input id="path" placeholder="/blog" size="10"></label>
+    <label>Search<input id="q" placeholder="city / isp / ip / link…" size="16"></label>
+    <label>Limit<input id="limit" type="number" value="200" min="1" max="5000" size="6"></label>
+    <label style="flex-direction:row;align-items:center;gap:5px;margin-top:14px">
+      <input id="bots" type="checkbox"> bots</label>
+    <button id="apply">Apply</button>
+    <button id="csv">⤓ Export CSV</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <div class="tops" id="tops"></div>
+  <div class="tablewrap"><table id="tbl">
+    <thead></thead><tbody><tr><td class="msg">Connect to load data.</td></tr></tbody>
+  </table></div>
+  <p style="color:var(--muted);font-size:12px">
+    Rows are capped at the limit above. <code>value</code> = visit&nbsp;# (pageview) / percent (scroll) / active&nbsp;seconds (ping).
+  </p>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let rows = [], sortKey = "ts", sortDir = -1;
+
+// Curated, readable columns (the API returns every column; CSV export is full).
+const COLS = [
+  { k: "ts", label: "Time", fmt: (v) => new Date(v).toLocaleString() },
+  { k: "type", label: "Type", fmt: (v) => `<span class="pill">${esc(v||"")}</span>` },
+  { k: "country", label: "Country" },
+  { k: "city", label: "City" },
+  { k: "isp", label: "ISP / org" },
+  { k: "ip", label: "IP", cls: "mono" },
+  { k: "path", label: "Path", cls: "mono" },
+  { k: "target", label: "Target", cls: "mono", fmt: (v) => v ? esc(String(v).slice(0, 60)) : "" },
+  { k: "value", label: "Value" },
+  { k: "browser", label: "Browser" },
+  { k: "os", label: "OS" },
+  { k: "device", label: "Device" },
+  { k: "referrer", label: "Referrer", cls: "mono", fmt: (v) => v ? esc(String(v).slice(0, 40)) : "" },
+  { k: "visitor_id", label: "Visitor", cls: "mono", fmt: (v) => v ? esc(String(v).slice(0, 8)) : "" },
+];
+
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function save() { localStorage.setItem("__an_api", $("api").value.trim()); localStorage.setItem("__an_tok", $("token").value); }
+function api() { return $("api").value.trim().replace(/\/$/, ""); }
+
+function dayMs(v, end) {
+  if (!v) return "";
+  const p = v.split("-");
+  return new Date(+p[0], +p[1]-1, +p[2], end?23:0, end?59:0, end?59:0, end?999:0).getTime();
+}
+function query(extra) {
+  const p = new URLSearchParams();
+  p.set("token", $("token").value);
+  if ($("from").value) p.set("from", dayMs($("from").value, false));
+  if ($("to").value) p.set("to", dayMs($("to").value, true));
+  if ($("type").value) p.set("type", $("type").value);
+  if ($("country").value) p.set("country", $("country").value.trim().toUpperCase());
+  if ($("path").value) p.set("path", $("path").value.trim());
+  if ($("q").value) p.set("q", $("q").value.trim());
+  if ($("limit").value) p.set("limit", $("limit").value);
+  if ($("bots").checked) p.set("bots", "include");
+  for (const k in (extra||{})) p.set(k, extra[k]);
+  return p.toString();
+}
+
+async function load() {
+  if (!api() || !$("token").value) { $("conn").textContent = "enter URL + token"; return; }
+  save();
+  $("conn").textContent = "loading…"; $("conn").className = "";
+  try {
+    const res = await fetch(api() + "/api/stats?" + query());
+    if (res.status === 401) throw new Error("Unauthorized — check the token");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    rows = data.rows || [];
+    renderCards(data); renderTops(data.summary || {}); renderTable();
+    $("conn").innerHTML = `<span style="color:var(--good)">● ${data.total} events · ${data.uniqueVisitors} visitors</span>`;
+  } catch (e) {
+    $("conn").innerHTML = `<span class="err">● ${esc(e.message)}</span>`;
+  }
+}
+
+function renderCards(d) {
+  $("cards").innerHTML = [
+    ["Total events", d.total], ["Unique visitors", d.uniqueVisitors],
+    ["Pageviews", d.pageviews], ["Shown", d.returned],
+  ].map(([l, n]) => `<div class="card"><div class="n">${n||0}</div><div class="l">${l}</div></div>`).join("");
+}
+function renderTops(s) {
+  const block = (title, arr) => `<div class="top"><h3>${title}</h3>${
+    (arr && arr.length ? arr : [{k:"—",n:""}]).map((r) =>
+      `<div class="row"><span title="${esc(r.k||"")}">${esc(r.k || "(none)")}</span><b>${r.n}</b></div>`).join("")
+  }</div>`;
+  $("tops").innerHTML =
+    block("Top countries", s.topCountries) + block("Top pages", s.topPaths) +
+    block("Top referrers", s.topReferrers) + block("Top links clicked", s.topLinks);
+}
+function renderTable() {
+  const sorted = rows.slice().sort((a, b) => {
+    let x = a[sortKey], y = b[sortKey];
+    if (x == null) x = ""; if (y == null) y = "";
+    if (typeof x === "number" && typeof y === "number") return (x - y) * sortDir;
+    return String(x).localeCompare(String(y)) * sortDir;
+  });
+  $("tbl").querySelector("thead").innerHTML = "<tr>" + COLS.map((c) =>
+    `<th data-k="${c.k}">${c.label}${sortKey===c.k ? (sortDir<0?" ▾":" ▴") : ""}</th>`).join("") + "</tr>";
+  $("tbl").querySelectorAll("th").forEach((th) => th.onclick = () => {
+    const k = th.dataset.k;
+    if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = -1; }
+    renderTable();
+  });
+  const body = sorted.length ? sorted.map((r) => "<tr>" + COLS.map((c) => {
+    const raw = r[c.k];
+    const html = c.fmt ? c.fmt(raw) : (raw == null ? "" : esc(raw));
+    return `<td class="${c.cls||""}" title="${esc(raw==null?"":raw)}">${html}</td>`;
+  }).join("") + "</tr>").join("") : `<tr><td class="msg" colspan="${COLS.length}">No rows match these filters.</td></tr>`;
+  $("tbl").querySelector("tbody").innerHTML = body;
+}
+
+$("connect").onclick = load;
+$("apply").onclick = load;
+$("csv").onclick = () => {
+  if (!api() || !$("token").value) return;
+  const a = document.createElement("a");
+  a.href = api() + "/api/stats?" + query({ format: "csv" });
+  a.download = "visits.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+// restore saved connection
+$("api").value = localStorage.getItem("__an_api") || "";
+$("token").value = localStorage.getItem("__an_tok") || "";
+if ($("api").value && $("token").value) load();
+</script>
+</body>
+</html>
