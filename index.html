@@ -254,10 +254,10 @@ html{scroll-behavior:smooth;}
 </helmet>
 
 <div ref="{{ setRoot }}" style="font-family:'Space Grotesk',-apple-system,sans-serif; --neon-a:#a371f7; --neon-b:#ec6cb9; --neon-c:#3b82f6; --ink:#16141f; --muted:#6f6a7e; --faint:#9b97a8; --line:rgba(22,20,31,0.09); --bg:#f4f3f8; --spot:1; --px:clamp(20px,5vw,84px); box-sizing:border-box; min-height:100vh; background:var(--bg); color:var(--ink);">
-  <div style="max-width:1640px; margin:0 auto; overflow:hidden;">
+  <div style="max-width:1640px; margin:0 auto; overflow-x:clip;">
 
     <!-- header -->
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:22px var(--px); border-bottom:1px solid var(--line);">
+    <div class="kk-header" style="position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px var(--px); border-bottom:1px solid var(--line); background:color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter:saturate(150%) blur(14px); backdrop-filter:saturate(150%) blur(14px); transition:box-shadow .3s ease;">
       <div style="display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.04em; color:var(--muted);">
         <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,var(--neon-a),var(--neon-b));"></span>
         kushlesh kumar
@@ -284,13 +284,13 @@ html{scroll-behavior:smooth;}
     </div>
 
     <!-- about -->
-    <div id="about" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:24px;">
+    <div id="about" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:88px;">
       <div style="display:flex; align-items:center; gap:16px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.16em; color:var(--faint); text-transform:uppercase; margin-bottom:30px;">01 — About<div style="flex:1; height:1px; background:var(--line);"></div></div>
       <p style="font-size:clamp(18px,2.4vw,22px); line-height:1.62; font-weight:300; max-width:800px; margin:0; color:var(--ink); text-wrap:pretty;">Engineering from IIT Bombay, an MBA from Cornell Johnson. Product Manager by day, tinkerer and founder by night — chasing one thing in everything I build: <em style="font-style:normal; background:linear-gradient(110deg,var(--neon-a),var(--neon-b)); -webkit-background-clip:text; background-clip:text; color:transparent;">delighting the people who use it.</em></p>
     </div>
 
     <!-- experience -->
-    <div id="experience" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:24px;">
+    <div id="experience" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:88px;">
       <div style="display:flex; align-items:center; gap:16px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.16em; color:var(--faint); text-transform:uppercase; margin-bottom:24px;">02 — Experience<div style="flex:1; height:1px; background:var(--line);"></div></div>
       <div style="display:flex; flex-direction:column;">
         <div class="kk-exp" style="display:grid; grid-template-columns:230px 1fr auto; gap:24px; align-items:baseline; padding:22px 0; border-bottom:1px solid var(--line);">
@@ -317,7 +317,7 @@ html{scroll-behavior:smooth;}
     </div>
 
     <!-- education -->
-    <div id="education" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:24px;">
+    <div id="education" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:88px;">
       <div style="display:flex; align-items:center; gap:16px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.16em; color:var(--faint); text-transform:uppercase; margin-bottom:24px;">03 — Education<div style="flex:1; height:1px; background:var(--line);"></div></div>
       <div class="kk-edu" style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
         <div style="background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px;">
@@ -335,7 +335,7 @@ html{scroll-behavior:smooth;}
     </div>
 
     <!-- work -->
-    <div id="work" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:24px;">
+    <div id="work" style="padding:clamp(48px,6vw,64px) var(--px); border-top:1px solid var(--line); scroll-margin-top:88px;">
       <div style="display:flex; align-items:center; gap:16px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.16em; color:var(--faint); text-transform:uppercase; margin-bottom:30px;">04 — Selected work<div style="flex:1; height:1px; background:var(--line);"></div></div>
       <div style="display:flex; flex-direction:column; gap:26px;">
 
@@ -350,11 +350,11 @@ html{scroll-behavior:smooth;}
               <a href="https://apps.apple.com/app/id6740315782" target="_blank" style="font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--neon-a); padding-bottom:2px;">App Store ↗</a>
             </div>
           </div>
-          <div class="kk-proj-img" style="height:280px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#e7eff4,#efe9f6); display:flex; align-items:center; justify-content:center;"><img src="assets/89e7959c-7880-49fa-a37e-6a8c31d2fe2c.png" alt="PranaSync app" style="height:100%; width:auto; object-fit:contain;"></div>
+          <div class="kk-proj-img" style="height:280px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#e7eff4,#efe9f6); display:flex; align-items:center; justify-content:center;"><picture style="display:contents"><source srcset="assets/89e7959c-7880-49fa-a37e-6a8c31d2fe2c.avif" type="image/avif"><source srcset="assets/89e7959c-7880-49fa-a37e-6a8c31d2fe2c.webp" type="image/webp"><img src="assets/89e7959c-7880-49fa-a37e-6a8c31d2fe2c.png" alt="PranaSync app" style="height:100%; width:auto; object-fit:contain;"></picture></div>
         </div>
 
         <div class="kk-proj" data-tilt="" data-emoji="🐕 🦴 📸 🐾" style="position:relative; display:grid; grid-template-columns:.95fr 1.05fr; gap:38px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:16px; padding:26px; transition:box-shadow .35s, transform .25s, border-color .35s; will-change:transform;" style-hover="box-shadow:0 28px 64px -22px color-mix(in srgb,var(--neon-b) 55%, transparent); border-color:color-mix(in srgb,var(--neon-b) 35%, var(--line));">
-          <div class="kk-proj-img" style="height:250px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#f8eef3,#eef0f8);"><img src="assets/c601ae66-e49a-477e-a446-93da3a61f6b3.jpg" alt="Snap-Dog app" style="width:100%; height:100%; object-fit:cover;"></div>
+          <div class="kk-proj-img" style="height:250px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#f8eef3,#eef0f8);"><picture style="display:contents"><source srcset="assets/c601ae66-e49a-477e-a446-93da3a61f6b3.avif" type="image/avif"><source srcset="assets/c601ae66-e49a-477e-a446-93da3a61f6b3.webp" type="image/webp"><img src="assets/c601ae66-e49a-477e-a446-93da3a61f6b3.jpg" alt="Snap-Dog app" style="width:100%; height:100%; object-fit:cover;"></picture></div>
           <div class="kk-proj-txt" style="padding:14px 20px 14px 8px;">
             <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em; color:var(--faint); margin-bottom:14px;">iOS · TENSORFLOW</div>
             <h3 style="font-size:clamp(21px,2.4vw,26px); font-weight:500; margin:0 0 12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">Snap-Dog App <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; color:var(--faint); border:1px solid var(--line); border-radius:30px; padding:3px 9px; text-transform:uppercase;">Discontinued</span></h3>
@@ -373,11 +373,11 @@ html{scroll-behavior:smooth;}
               <a href="https://www.kaggle.com/kushleshkumar/cornell-car-rental-dataset" target="_blank" style="font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--neon-c); padding-bottom:2px;">Dataset ↗</a>
             </div>
           </div>
-          <div class="kk-proj-img" style="height:250px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#eef0f8,#efe9f6);"><img src="assets/08701391-33d9-48ac-a85b-8e2e3b834676.png" alt="Car rental EDA" style="width:100%; height:100%; object-fit:cover;"></div>
+          <div class="kk-proj-img" style="height:250px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#eef0f8,#efe9f6);"><picture style="display:contents"><source srcset="assets/08701391-33d9-48ac-a85b-8e2e3b834676.avif" type="image/avif"><source srcset="assets/08701391-33d9-48ac-a85b-8e2e3b834676.webp" type="image/webp"><img src="assets/08701391-33d9-48ac-a85b-8e2e3b834676.png" alt="Car rental EDA" style="width:100%; height:100%; object-fit:cover;"></picture></div>
         </div>
 
         <div class="kk-proj" data-tilt="" data-emoji="🎨 🖼️ ✨ 🧠" style="position:relative; display:grid; grid-template-columns:.95fr 1.05fr; gap:38px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:16px; padding:26px; transition:box-shadow .35s, transform .25s, border-color .35s; will-change:transform;" style-hover="box-shadow:0 28px 64px -22px color-mix(in srgb,var(--neon-a) 55%, transparent); border-color:color-mix(in srgb,var(--neon-a) 35%, var(--line));">
-          <div class="kk-proj-img" style="height:250px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#efe9f6,#eef0f8);"><img src="assets/74c4d97e-70cb-4b0d-9ac2-7924ac10628e.jpg" alt="Neural style transfer" style="width:100%; height:100%; object-fit:cover;"></div>
+          <div class="kk-proj-img" style="height:250px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#efe9f6,#eef0f8);"><picture style="display:contents"><source srcset="assets/74c4d97e-70cb-4b0d-9ac2-7924ac10628e.avif" type="image/avif"><source srcset="assets/74c4d97e-70cb-4b0d-9ac2-7924ac10628e.webp" type="image/webp"><img src="assets/74c4d97e-70cb-4b0d-9ac2-7924ac10628e.jpg" alt="Neural style transfer" style="width:100%; height:100%; object-fit:cover;"></picture></div>
           <div class="kk-proj-txt" style="padding:14px 20px 14px 8px;">
             <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em; color:var(--faint); margin-bottom:14px;">NEURAL NET · ART</div>
             <h3 style="font-size:clamp(21px,2.4vw,26px); font-weight:500; margin:0 0 12px;">Painting Like Picasso</h3>
@@ -390,7 +390,7 @@ html{scroll-behavior:smooth;}
     </div>
 
     <!-- contact -->
-    <div id="contact" data-spotlight="" style="position:relative; overflow:hidden; padding:clamp(64px,8vw,90px) var(--px); border-top:1px solid var(--line); background:#fbfbfd; scroll-margin-top:24px;" style-before="content:''; position:absolute; inset:0; pointer-events:none; opacity:var(--spot,1); background:radial-gradient(480px circle at var(--mx,70%) var(--my,50%), color-mix(in srgb, var(--neon-b) 16%, transparent), transparent 60%); transition:opacity .3s;">
+    <div id="contact" data-spotlight="" style="position:relative; overflow:hidden; padding:clamp(64px,8vw,90px) var(--px); border-top:1px solid var(--line); background:#fbfbfd; scroll-margin-top:88px;" style-before="content:''; position:absolute; inset:0; pointer-events:none; opacity:var(--spot,1); background:radial-gradient(480px circle at var(--mx,70%) var(--my,50%), color-mix(in srgb, var(--neon-b) 16%, transparent), transparent 60%); transition:opacity .3s;">
       <div style="position:relative; z-index:1;">
         <div style="display:flex; align-items:center; gap:16px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.16em; color:var(--faint); text-transform:uppercase; margin-bottom:26px;">05 — Contact</div>
         <h2 style="font-size:clamp(30px,4.5vw,46px); font-weight:400; letter-spacing:-.02em; margin:0 0 32px; max-width:620px; line-height:1.1;">Let's build the <span style="background:linear-gradient(110deg,var(--neon-a),var(--neon-b)); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:500;">next thing.</span></h2>
@@ -431,6 +431,12 @@ class Component extends DCLogic {
   setupEffects() {
     const r = this.rootEl; if (!r || this._fx) return; this._fx = true;
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const header = r.querySelector('.kk-header');
+    if (header) {
+      const onScroll = () => { header.style.boxShadow = window.scrollY > 8 ? '0 10px 30px -18px rgba(22,20,31,0.35)' : 'none'; };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
     r.querySelectorAll('[data-spotlight]').forEach(el => {
       el.addEventListener('mousemove', e => {
         const b = el.getBoundingClientRect();
