@@ -24,11 +24,9 @@ database_id = "43ba52f7-4d36-4528-9801-fa2767167e76"
 [assets]
 directory = "./public"
 
-# Cloudflare Access (Zero Trust SSO). Fill these in AFTER creating the Access
-# application that protects this Worker, so /api/stats accepts your Google login
-# instead of the token. Leave empty until then — DASH_TOKEN keeps working.
-#   ACCESS_TEAM_DOMAIN : your team domain, e.g. "kushlesh.cloudflareaccess.com"
-#   ACCESS_AUD         : the Application Audience (AUD) tag of that Access app
+# Cloudflare Access (Zero Trust SSO) — values filled in 2026-06-22.
+# Team domain: bitter-cell-7e89.cloudflareaccess.com
+# Access apps: main app = whole host (Allow Kushlesh / email OTP); bypass app = /collect (Everyone)
 [vars]
-ACCESS_TEAM_DOMAIN = ""
-ACCESS_AUD = ""
+ACCESS_TEAM_DOMAIN = "bitter-cell-7e89.cloudflareaccess.com"
+ACCESS_AUD = "94c2a8f46f1b74c4d2b12f3153127e07fb309a696a3ec001a5344eddc1f79039"
