@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS events (
   client_tz    TEXT,
   color_scheme TEXT,                       -- light | dark
   connection   TEXT,                       -- 4g | wifi | ...
-  load_ms      INTEGER                     -- page load time (ms)
+  load_ms      INTEGER                     -- full load time (ms) if `load` had already
+                                           -- fired, else time to DOM-interactive
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_ts      ON events(ts);

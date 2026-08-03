@@ -80,24 +80,26 @@
     } catch (e) { /* never let tracking break the page */ }
   }
 
-  // ---- pageview (after load, so we can include load timing) ----
-  function loadMs() {
+  // ---- pageview (reported as early as possible, not after load) ----
+  // Full load time once the load event has fired, otherwise time to
+  // DOM-interactive. We must not wait for `load` before reporting.
+  function timingMs() {
     try {
       var nav = performance.getEntriesByType("navigation")[0];
-      if (nav) return Math.round(nav.duration);
+      if (nav) return Math.round(nav.loadEventEnd > 0 ? nav.duration : nav.domInteractive);
       var t = performance.timing;
-      return t ? (t.loadEventEnd - t.navigationStart) : null;
+      return t && t.loadEventEnd ? t.loadEventEnd - t.navigationStart : null;
     } catch (e) { return null; }
   }
   function pageview() {
     var p = base();
     p.type = "pageview";
     p.value = visitNo;            // value on a pageview = visit number (1 = first ever)
-    p.load_ms = loadMs();
+    p.load_ms = timingMs();
     send(p);
   }
-  if (document.readyState === "complete") pageview();
-  else window.addEventListener("load", pageview, { once: true });
+  // Fire immediately. The script already loads with `defer`, so the DOM is ready.
+  pageview();
 
   // ---- click tracking (delegated on document, survives DOM swaps) ----
   document.addEventListener("click", function (e) {
