@@ -167,10 +167,18 @@ async function load() {
 }
 
 function renderCards(d) {
+  // `—` rather than 0 when there is nothing to average, so an empty range reads
+  // as "no data" instead of "0 seconds".
+  const or = (v, suffix) => (v == null ? "—" : v + suffix);
   $("cards").innerHTML = [
-    ["Total events", d.total], ["Unique visitors", d.uniqueVisitors],
-    ["Pageviews", d.pageviews], ["Shown", d.returned],
-  ].map(([l, n]) => `<div class="card"><div class="n">${n||0}</div><div class="l">${l}</div></div>`).join("");
+    ["Total events", d.total || 0], ["Unique visitors", d.uniqueVisitors || 0],
+    ["Pageviews", d.pageviews || 0], ["Sessions", d.sessions || 0],
+    ["Avg time on page", or(d.avgEngagementSec, "s")],
+    ["Bounce rate", or(d.bounceRate, "%")],
+    ["Scrolled halfway", or(d.scrolledHalfway, "%")],
+    ["New / returning", (d.firstTimeViews || 0) + " / " + (d.returningViews || 0)],
+    ["Shown", d.returned || 0],
+  ].map(([l, n]) => `<div class="card"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
 }
 function renderTops(s) {
   const block = (title, arr) => `<div class="top"><h3>${title}</h3>${
@@ -179,7 +187,8 @@ function renderTops(s) {
   }</div>`;
   $("tops").innerHTML =
     block("Top countries", s.topCountries) + block("Top pages", s.topPaths) +
-    block("Top referrers", s.topReferrers) + block("Top links clicked", s.topLinks);
+    block("Top referrers", s.topReferrers) + block("Top links clicked", s.topLinks) +
+    block("Devices", s.topDevices);
 }
 function renderTable() {
   const sorted = rows.slice().sort((a, b) => {

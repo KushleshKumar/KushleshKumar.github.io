@@ -14,6 +14,17 @@
 
   if (!ENDPOINT || ENDPOINT === "REPLACE_WITH_WORKER_URL") return; // not configured yet
 
+  // ---- owner opt-out ----------------------------------------------------
+  // Load any page once with `?__no_track=1` and this browser is excluded from
+  // then on; `?__no_track=0` undoes it. Without this the site owner's own
+  // visits dominate the data — they were ~90% of it before this was added.
+  try {
+    var optOut = new URLSearchParams(location.search).get("__no_track");
+    if (optOut === "1") localStorage.setItem("__an_optout", "1");
+    else if (optOut === "0") localStorage.removeItem("__an_optout");
+    if (localStorage.getItem("__an_optout") === "1") return;
+  } catch (e) { /* private mode: no storage, so nothing to opt out of */ }
+
   // The page's bundle loader re-executes scripts when it swaps the document at
   // runtime, which would run this tracker twice and double-count every event.
   // The first run's delegated listeners survive the swap, so we just bail out of

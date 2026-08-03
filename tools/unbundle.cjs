@@ -68,6 +68,22 @@ const inject =
   '\n  <!-- Visitor analytics — self-hosted Cloudflare Worker + D1. Setup: /analytics/README.md -->' +
   '\n  <script src="/analytics/tracker.js" defer></script>';
 template = template.replace(/<head[^>]*>/i, (h) => h + inject);
+
+// The bundler emits no <title> and no share metadata, so re-add it here. Without
+// this, every re-export silently ships a page with no name in the browser tab,
+// no name in Google results and no link preview. Keep in sync with index.html.
+// Skipped automatically if the source ever starts supplying its own title.
+const META =
+  '\n<title>Kushlesh Kumar — Product Manager · AI · 0→1</title>' +
+  '\n<meta name="description" content="Product Manager at Amazon and co-founder of PranaSync. Cornell MBA, IIT Bombay. I build products that are more useful and more loved.">' +
+  '\n<link rel="canonical" href="https://kushleshkumar.github.io/">' +
+  '\n<meta property="og:type" content="website">' +
+  '\n<meta property="og:url" content="https://kushleshkumar.github.io/">' +
+  '\n<meta property="og:title" content="Kushlesh Kumar — Product Manager · AI · 0→1">' +
+  '\n<meta property="og:description" content="Product Manager at Amazon and co-founder of PranaSync. Cornell MBA, IIT Bombay. I build products that are more useful and more loved.">' +
+  '\n<meta name="twitter:card" content="summary_large_image">';
+if (!/<title\b/i.test(template)) template = template.replace(/<head[^>]*>/i, (h) => h + META);
+
 template = template.replace(/<head[^>]*>[\s\S]*?<\/head>/i, (head) =>
   head.replace(/<script\b([^>]*\bsrc=[^>]*)>/gi, (mm, a) =>
     /\bdefer\b|\basync\b|text\/babel/i.test(a) ? mm : '<script ' + a.trim() + ' defer>'));

@@ -97,7 +97,7 @@ async function collect(request, env) {
     browser: env_.browser,
     os: env_.os,
     device: env_.device,
-    is_bot: env_.bot ? 1 : 0,
+    is_bot: (env_.bot || isDatacenter(cf)) ? 1 : 0,
     // ---- client-reported ----
     screen_w: int(body.screen_w),
     screen_h: int(body.screen_h),
@@ -199,13 +199,53 @@ async function stats(request, env, url) {
     `SELECT target AS k, COUNT(*) AS n FROM events ${andType("type IN ('click','outbound','download') AND target <> ''")} GROUP BY target ORDER BY n DESC LIMIT 10`
   ).bind(...binds).all()).results;
 
+  // Engagement. The tracker has always sent scroll depth, active seconds and
+  // visit number; none of it was aggregated, so it was only ever visible by
+  // reading raw rows. A `ping` carries active seconds so far, so the last one
+  // in a session is that session's total.
+  const engagement = await env.DB.prepare(
+    `SELECT AVG(secs) AS avg_secs FROM (
+       SELECT MAX(value) AS secs FROM events ${andType("type='ping'")} GROUP BY session_id)`
+  ).bind(...binds).first();
+
+  // A bounce is a session that saw one page and never clicked anything.
+  const sessions = await env.DB.prepare(
+    `SELECT COUNT(*) AS n,
+            SUM(CASE WHEN pv <= 1 AND clicks = 0 THEN 1 ELSE 0 END) AS bounced,
+            SUM(CASE WHEN deep > 0 THEN 1 ELSE 0 END) AS deep
+     FROM (SELECT session_id,
+                  SUM(CASE WHEN type='pageview' THEN 1 ELSE 0 END) pv,
+                  SUM(CASE WHEN type IN ('click','outbound','download') THEN 1 ELSE 0 END) clicks,
+                  SUM(CASE WHEN type='scroll' AND value >= 50 THEN 1 ELSE 0 END) deep
+           FROM events ${whereSql} GROUP BY session_id)`
+  ).bind(...binds).first();
+
+  const repeat = await env.DB.prepare(
+    `SELECT SUM(CASE WHEN visit_no = 1 THEN 1 ELSE 0 END) AS first_time,
+            SUM(CASE WHEN visit_no > 1 THEN 1 ELSE 0 END) AS repeat_views
+     FROM events ${andType("type='pageview'")}`
+  ).bind(...binds).first();
+
+  const topDevices = (await env.DB.prepare(
+    `SELECT device AS k, COUNT(*) AS n FROM events ${andType("type='pageview'")} GROUP BY device ORDER BY n DESC`
+  ).bind(...binds).all()).results;
+
+  const nSessions = sessions?.n || 0;
+  const pct = (v) => (nSessions ? Math.round((100 * (v || 0)) / nSessions) : null);
+
   return cors(json({
     total: totals?.n || 0,
     uniqueVisitors: totals?.uv || 0,
     pageviews: totals?.pv || 0,
     returned: rows.length,
     limit, offset,
-    summary: { topCountries, topPaths, topReferrers, topLinks },
+    sessions: nSessions,
+    avgEngagementSec: engagement?.avg_secs != null ? Math.round(engagement.avg_secs) : null,
+    bounceRate: pct(sessions?.bounced),
+    scrolledHalfway: pct(sessions?.deep),
+    firstTimeViews: repeat?.first_time || 0,
+    returningViews: repeat?.repeat_views || 0,
+    summary: { topCountries, topPaths, topReferrers, topLinks, topDevices },
     rows,
   }));
 }
@@ -293,6 +333,18 @@ function cookie(request, name) {
   const m = (request.headers.get("cookie") || "").match(new RegExp("(?:^|; )" + name + "=([^;]+)"));
   return m ? decodeURIComponent(m[1]) : "";
 }
+// Scanners running on cheap hosting announce themselves as ordinary browsers, so
+// the user-agent check above never catches them and they inflate the visitor
+// count. Match on the network operator instead.
+//
+// Amazon, Google and Microsoft are deliberately NOT in this list even though
+// they run datacenters: their corporate networks also carry real people, and an
+// Amazon colleague opening this site is exactly the visitor worth keeping.
+const DATACENTER = /alibaba|tencent|digitalocean|linode|hetzner|\bovh\b|vultr|scaleway|contabo|leaseweb|choopa|m247|datacamp|censys|shodan|hostwinds|colocrossing|serverion|zenlayer|quadranet|hostinger/i;
+function isDatacenter(cf) {
+  return DATACENTER.test(String(cf.asOrganization || ""));
+}
+
 function parseUA(ua) {
   const u = ua.toLowerCase();
   const bot = /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebookexternal|embedly|preview|monitor|curl|wget|python-requests|headless|lighthouse|pingdom|uptime/.test(u);
