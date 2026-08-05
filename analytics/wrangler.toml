@@ -1,0 +1,32 @@
+name = "site-analytics"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Serve at <name>.<subdomain>.workers.dev; no per-version preview URLs.
+workers_dev = true
+preview_urls = false
+
+# D1 binding. After `wrangler d1 create site_analytics`, paste the printed
+# database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "site_analytics"
+database_id = "43ba52f7-4d36-4528-9801-fa2767167e76"
+
+# DASH_TOKEN is a SECRET — never commit it. Set it with:
+#   wrangler secret put DASH_TOKEN
+#
+# /collect is intentionally public (that is how browser beacons work);
+# only /api/stats requires the token.
+
+# Static assets: the dashboard UI is served by this Worker at /dashboard,
+# gated by Cloudflare Access (see README → "Host the dashboard with Google login").
+[assets]
+directory = "./public"
+
+# Cloudflare Access (Zero Trust SSO) — values filled in 2026-06-22.
+# Team domain: bitter-cell-7e89.cloudflareaccess.com
+# Access apps: main app = whole host (Allow Kushlesh / email OTP); bypass app = /collect (Everyone)
+[vars]
+ACCESS_TEAM_DOMAIN = "bitter-cell-7e89.cloudflareaccess.com"
+ACCESS_AUD = "94c2a8f46f1b74c4d2b12f3153127e07fb309a696a3ec001a5344eddc1f79039"
