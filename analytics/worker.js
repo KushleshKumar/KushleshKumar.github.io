@@ -220,10 +220,17 @@ async function stats(request, env, url) {
            FROM events ${whereSql} GROUP BY session_id)`
   ).bind(...binds).first();
 
+  // A repeat visitor is one seen on more than one day. The tracker's `visit_no`
+  // looks like it should answer this but does not: it increments on every page
+  // load, so one person reading nine pages in a single sitting reports as one
+  // new visit plus eight returns. Count distinct days per visitor instead.
+  //
+  // Days are UTC, so an evening session that crosses UTC midnight counts as two.
   const repeat = await env.DB.prepare(
-    `SELECT SUM(CASE WHEN visit_no = 1 THEN 1 ELSE 0 END) AS first_time,
-            SUM(CASE WHEN visit_no > 1 THEN 1 ELSE 0 END) AS repeat_views
-     FROM events ${andType("type='pageview'")}`
+    `SELECT SUM(CASE WHEN days = 1 THEN 1 ELSE 0 END) AS one_day,
+            SUM(CASE WHEN days > 1 THEN 1 ELSE 0 END) AS multi_day
+     FROM (SELECT visitor_id, COUNT(DISTINCT date(ts/1000, 'unixepoch')) AS days
+           FROM events ${whereSql} GROUP BY visitor_id)`
   ).bind(...binds).first();
 
   const topDevices = (await env.DB.prepare(
@@ -243,8 +250,8 @@ async function stats(request, env, url) {
     avgEngagementSec: engagement?.avg_secs != null ? Math.round(engagement.avg_secs) : null,
     bounceRate: pct(sessions?.bounced),
     scrolledHalfway: pct(sessions?.deep),
-    firstTimeViews: repeat?.first_time || 0,
-    returningViews: repeat?.repeat_views || 0,
+    newVisitors: repeat?.one_day || 0,
+    repeatVisitors: repeat?.multi_day || 0,
     summary: { topCountries, topPaths, topReferrers, topLinks, topDevices },
     rows,
   }));

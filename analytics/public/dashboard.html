@@ -176,7 +176,7 @@ function renderCards(d) {
     ["Avg time on page", or(d.avgEngagementSec, "s")],
     ["Bounce rate", or(d.bounceRate, "%")],
     ["Scrolled halfway", or(d.scrolledHalfway, "%")],
-    ["New / returning", (d.firstTimeViews || 0) + " / " + (d.returningViews || 0)],
+    ["New / repeat visitors", (d.newVisitors || 0) + " / " + (d.repeatVisitors || 0)],
     ["Shown", d.returned || 0],
   ].map(([l, n]) => `<div class="card"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
 }
