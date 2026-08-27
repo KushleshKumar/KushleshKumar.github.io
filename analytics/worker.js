@@ -358,13 +358,14 @@ function isDatacenter(cf) {
 // real device has a square 2000x2000 "screen", none reports a viewport bigger
 // than its own screen, and a phone browser always keeps some height for its
 // own chrome. Checked per event, because these renderers reconfigure the
-// viewport partway through a session.
+// viewport partway through a session. Deliberately NOT checking viewport > screen:
+// on macOS a browser zoomed below 100% reports exactly that, and it flagged real
+// visitors when tested against stored data.
 function looksSynthetic(b, device) {
   const sw = +b.screen_w || 0, sh = +b.screen_h || 0;
   const vw = +b.viewport_w || 0, vh = +b.viewport_h || 0;
   if (!sw || !sh || !vw || !vh) return false;
   if (sw === 2000 && sh === 2000) return true;              // headless default
-  if (vw > sw || vh > sh) return true;                      // impossible on real hardware
   if (device === "mobile" && vw === sw && vh === sh) return true;  // no browser chrome
   return false;
 }
