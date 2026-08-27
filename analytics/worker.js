@@ -97,7 +97,7 @@ async function collect(request, env) {
     browser: env_.browser,
     os: env_.os,
     device: env_.device,
-    is_bot: (env_.bot || isDatacenter(cf)) ? 1 : 0,
+    is_bot: (env_.bot || isDatacenter(cf) || looksSynthetic(body, env_.device)) ? 1 : 0,
     // ---- client-reported ----
     screen_w: int(body.screen_w),
     screen_h: int(body.screen_h),
@@ -352,9 +352,26 @@ function isDatacenter(cf) {
   return DATACENTER.test(String(cf.asOrganization || ""));
 }
 
+// Headless renderers - link-preview bots, AI agents, cloud scanners - send an
+// ordinary browser user-agent from a network that carries real people too, so
+// neither check above sees them. Their emulated display is the giveaway: no
+// real device has a square 2000x2000 "screen", none reports a viewport bigger
+// than its own screen, and a phone browser always keeps some height for its
+// own chrome. Checked per event, because these renderers reconfigure the
+// viewport partway through a session.
+function looksSynthetic(b, device) {
+  const sw = +b.screen_w || 0, sh = +b.screen_h || 0;
+  const vw = +b.viewport_w || 0, vh = +b.viewport_h || 0;
+  if (!sw || !sh || !vw || !vh) return false;
+  if (sw === 2000 && sh === 2000) return true;              // headless default
+  if (vw > sw || vh > sh) return true;                      // impossible on real hardware
+  if (device === "mobile" && vw === sw && vh === sh) return true;  // no browser chrome
+  return false;
+}
+
 function parseUA(ua) {
   const u = ua.toLowerCase();
-  const bot = /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebookexternal|embedly|preview|monitor|curl|wget|python-requests|headless|lighthouse|pingdom|uptime/.test(u);
+  const bot = /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebookexternal|meta-webindexer|meta-external|embedly|preview|monitor|curl|wget|python-requests|headless|lighthouse|pingdom|uptime/.test(u);
   let browser = "Other";
   if (u.includes("edg/")) browser = "Edge";
   else if (u.includes("opr/") || u.includes(" opera")) browser = "Opera";

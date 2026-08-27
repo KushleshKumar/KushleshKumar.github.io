@@ -1,0 +1,23 @@
+# Meta AI crawlers — opt out of AI-search indexing, model training and ad
+# crawling. Meta documents these as honouring robots.txt.
+# https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/
+User-agent: meta-webindexer
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: meta-externalads
+Disallow: /
+
+# Fetches individual links at a user's request. Meta states this one MAY bypass
+# robots.txt, so treat the rule as best-effort rather than a guarantee.
+User-agent: meta-externalfetcher
+Disallow: /
+
+# facebookexternalhit is deliberately NOT blocked: it builds the preview card
+# when someone shares this site on Facebook, Instagram or Messenger. Blocking it
+# breaks those previews without preventing any AI indexing.
+
+User-agent: *
+Allow: /
